@@ -9,14 +9,14 @@ spec:
   interval: 1m
   secretRef:
     name: registry-credentials
----
-apiVersion: image.toolkit.fluxcd.io/v1beta2
-kind: ImageRepository
-metadata:
-  name: logisim
-  namespace: flux-system
-spec:
-  image: registry.melekabderrahmane.com/logisim
-  interval: 5m
-  secretRef:
-    name: registry-credentials
+# ---
+# apiVersion: image.toolkit.fluxcd.io/v1beta2
+# kind: ImageRepository
+# metadata:
+#   name: logisim
+#   namespace: flux-system
+# spec:
+#   image: registry.melekabderrahmane.com/logisim
+#   interval: 5m
+#   secretRef:
+#     name: registry-credentials
