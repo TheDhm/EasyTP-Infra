@@ -54,6 +54,11 @@ spec:
                 secretKeyRef:
                   name: django-secrets
                   key: SECRET_KEY
+            - name: WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: django-secrets
+                  key: WEBHOOK_SECRET
       containers:
         - name: django
           image: registry.melekabderrahmane.com/easytp-backend:713af28 # {"$imagepolicy": "flux-system:easytp-backend"}
@@ -91,6 +96,11 @@ spec:
                 secretKeyRef:
                   name: django-secrets
                   key: SECRET_KEY
+            - name: WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: django-secrets
+                  key: WEBHOOK_SECRET
             - name: NFS_SERVER
               value: "nfs-service.django-app.svc.cluster.local"
             - name: NFS_PATH
