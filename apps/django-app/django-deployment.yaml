@@ -19,129 +19,129 @@ spec:
       imagePullSecrets:
         - name: registry-pull-secret
       initContainers:
-      - name: migrate
-        image: registry.melekabderrahmane.com/easytp-backend:latest # {"$imagepolicy": "flux-system:easytp-backend"}
-        imagePullPolicy: Always
-        command: ["python", "manage.py", "migrate", "--noinput"]
-        env:
-        - name: DJANGO_SETTINGS_MODULE
-          valueFrom:
-            configMapKeyRef:
-              name: django-config
-              key: DJANGO_SETTINGS_MODULE
-        - name: DB_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: django-config
-              key: DB_HOST
-        - name: DB_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: django-config
-              key: DB_PORT
-        - name: DB_NAME
-          valueFrom:
-            configMapKeyRef:
-              name: django-config
-              key: DB_NAME
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: django-secrets
-              key: DB_PASSWORD
-        - name: SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              name: django-secrets
-              key: SECRET_KEY
+        - name: migrate
+          image: registry.melekabderrahmane.com/easytp-backend:713af28 # {"$imagepolicy": "flux-system:easytp-backend"}
+          imagePullPolicy: Always
+          command: ["python", "manage.py", "migrate", "--noinput"]
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              valueFrom:
+                configMapKeyRef:
+                  name: django-config
+                  key: DJANGO_SETTINGS_MODULE
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: django-config
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: django-config
+                  key: DB_PORT
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: django-config
+                  key: DB_NAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: django-secrets
+                  key: DB_PASSWORD
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: django-secrets
+                  key: SECRET_KEY
       containers:
-      - name: django
-        image: registry.melekabderrahmane.com/easytp-backend:latest # {"$imagepolicy": "flux-system:easytp-backend"}
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 8000
-        env:
-        - name: DJANGO_SETTINGS_MODULE
-          valueFrom:
-            configMapKeyRef:
-              name: django-config
-              key: DJANGO_SETTINGS_MODULE
-        - name: DB_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: django-config
-              key: DB_HOST
-        - name: DB_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: django-config
-              key: DB_PORT
-        - name: DB_NAME
-          valueFrom:
-            configMapKeyRef:
-              name: django-config
-              key: DB_NAME
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: django-secrets
-              key: DB_PASSWORD
-        - name: SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              name: django-secrets
-              key: SECRET_KEY
-        - name: NFS_SERVER
-          value: "nfs-service.django-app.svc.cluster.local"
-        - name: NFS_PATH
-          value: "/opt/django-shared"
-        volumeMounts:
-        - name: shared-data
-          mountPath: /app/staticfiles
-          subPath: staticfiles
-        - name: shared-data
-          mountPath: /app/media
-          subPath: media
-        - name: shared-data
-          mountPath: /READONLY
-          subPath: READONLY
-        - name: shared-data
-          mountPath: /USERDATA
-          subPath: USERDATA
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 8000
-            httpHeaders:
-            - name: Host
-              value: localhost
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 8000
-            httpHeaders:
-            - name: Host
-              value: localhost
-          initialDelaySeconds: 16
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "300m"
-          limits:
-            memory: "800Mi"
-            cpu: "800m"
+        - name: django
+          image: registry.melekabderrahmane.com/easytp-backend:713af28 # {"$imagepolicy": "flux-system:easytp-backend"}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              valueFrom:
+                configMapKeyRef:
+                  name: django-config
+                  key: DJANGO_SETTINGS_MODULE
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: django-config
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: django-config
+                  key: DB_PORT
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: django-config
+                  key: DB_NAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: django-secrets
+                  key: DB_PASSWORD
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: django-secrets
+                  key: SECRET_KEY
+            - name: NFS_SERVER
+              value: "nfs-service.django-app.svc.cluster.local"
+            - name: NFS_PATH
+              value: "/opt/django-shared"
+          volumeMounts:
+            - name: shared-data
+              mountPath: /app/staticfiles
+              subPath: staticfiles
+            - name: shared-data
+              mountPath: /app/media
+              subPath: media
+            - name: shared-data
+              mountPath: /READONLY
+              subPath: READONLY
+            - name: shared-data
+              mountPath: /USERDATA
+              subPath: USERDATA
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+              httpHeaders:
+                - name: Host
+                  value: localhost
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+              httpHeaders:
+                - name: Host
+                  value: localhost
+            initialDelaySeconds: 16
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "300m"
+            limits:
+              memory: "800Mi"
+              cpu: "800m"
       volumes:
-      - name: shared-data
-        hostPath:
-          path: /opt/django-shared
-          type: DirectoryOrCreate
+        - name: shared-data
+          hostPath:
+            path: /opt/django-shared
+            type: DirectoryOrCreate
       serviceAccountName: django-account
 ---
 apiVersion: v1
