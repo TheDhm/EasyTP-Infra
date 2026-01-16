@@ -1,0 +1,28 @@
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: easytp-backend
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: easytp-backend
+  policy:
+    alphabetical:
+      order: desc
+  filterTags:
+    pattern: '^[a-f0-9]{7,40}$'
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: logisim
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: logisim
+  policy:
+    alphabetical:
+      order: desc
+  filterTags:
+    pattern: '^[a-f0-9]{7,40}$'

@@ -1,0 +1,15 @@
+# Secrets - NEVER commit
+**/secret*.yaml
+**/secrets/
+*.env
+
+# Editor files
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

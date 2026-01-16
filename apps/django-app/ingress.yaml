@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: django-ingress
+  namespace: django-app
+  annotations:
+    traefik.ingress.kubernetes.io/proxy-body-size: "100m"
+    traefik.ingress.kubernetes.io/ssl-redirect: "true"
+    traefik.ingress.kubernetes.io/backend-protocol: "HTTP"
+spec:
+  tls:
+  - hosts:
+    - api.melekabderrahmane.com
+    secretName: cloudflare-origin-cert
+  rules:
+  - host: api.melekabderrahmane.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-service
+            port:
+              number: 80
