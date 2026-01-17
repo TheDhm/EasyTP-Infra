@@ -7,11 +7,11 @@ metadata:
 spec:
   imageRepositoryRef:
     name: easytp-backend
+  filterTags:
+    pattern: '^\d{8}-\d{6}-[a-f0-9]{7,40}$'
   policy:
     alphabetical:
-      order: desc
-  filterTags:
-    pattern: '^[a-f0-9]{7,40}$'
+      order: asc
 # ---
 # apiVersion: image.toolkit.fluxcd.io/v1beta2
 # kind: ImagePolicy
