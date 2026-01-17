@@ -20,7 +20,7 @@ spec:
         - name: registry-pull-secret
       initContainers:
         - name: migrate
-          image: registry.melekabderrahmane.com/easytp-backend:20260117-121433-78e62c4 # {"$imagepolicy": "flux-system:easytp-backend"}
+          image: registry.melekabderrahmane.com/easytp-backend:20260117-123758-453c931 # {"$imagepolicy": "flux-system:easytp-backend"}
           imagePullPolicy: Always
           command: ["python", "manage.py", "migrate", "--noinput"]
           env:
@@ -61,7 +61,7 @@ spec:
                   key: WEBHOOK_SECRET
       containers:
         - name: django
-          image: registry.melekabderrahmane.com/easytp-backend:20260117-121433-78e62c4 # {"$imagepolicy": "flux-system:easytp-backend"}
+          image: registry.melekabderrahmane.com/easytp-backend:20260117-123758-453c931 # {"$imagepolicy": "flux-system:easytp-backend"}
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
