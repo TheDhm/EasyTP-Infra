@@ -101,6 +101,11 @@ spec:
                 secretKeyRef:
                   name: django-secrets
                   key: WEBHOOK_SECRET
+            - name: REGISTRY_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: django-config
+                  key: REGISTRY_URL
             - name: NFS_SERVER
               value: "nfs-service.django-app.svc.cluster.local"
             - name: NFS_PATH
