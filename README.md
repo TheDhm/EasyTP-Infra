@@ -13,6 +13,11 @@ GitOps repository for EasyTP Kubernetes infrastructure managed by Flux CD.
 └── image-automation/        # Flux image update automation
 ```
 
+## Related Repositories
+
+- **Frontend**: [EasyTP-Frontend](https://github.com/TheDhm/EasyTP-Frontend)
+- **Backend**: [EasyTP-Backend](https://github.com/TheDhm/EasyTP-Backend)
+
 ## Secrets (Manual)
 
 These secrets must be created manually (not stored in git):
@@ -32,11 +37,12 @@ kubectl create secret docker-registry registry-pull-secret \
   --docker-username=<username> \
   --docker-password=<password>
 
-# Django secrets (DB_PASSWORD, SECRET_KEY)
+# Django secrets (DB_PASSWORD, SECRET_KEY, WEBHOOK_SECRET)
 kubectl create secret generic django-secrets \
   --namespace=django-app \
   --from-literal=DB_PASSWORD=<password> \
-  --from-literal=SECRET_KEY=<secret-key>
+  --from-literal=SECRET_KEY=<secret-key> \
+  --from-literal=WEBHOOK_SECRET=<webhook-secret>
 ```
 
 ## Bootstrap
@@ -45,7 +51,7 @@ kubectl create secret generic django-secrets \
 export GITHUB_TOKEN=<your-pat>
 
 flux bootstrap github \
-  --owner=TheDhm \
+  --owner=<your-github-username> \
   --repository=EasyTP-Infra \
   --branch=main \
   --path=./clusters/production \
