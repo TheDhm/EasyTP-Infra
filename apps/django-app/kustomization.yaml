@@ -4,6 +4,7 @@ resources:
   - serviceaccount.yaml
   - role.yaml
   - rolebinding.yaml
+  - cleanup-rbac.yaml
   - configmap.yaml
   - nginx-configmap.yaml
   - postgresql.yaml
