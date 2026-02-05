@@ -1,0 +1,137 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 30m
+  timeout: 15m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: ">=81.0.0 <82.0.0"
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+      interval: 12h
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  values:
+    fullnameOverride: prometheus
+
+    # --- GRAFANA ---
+    grafana:
+      enabled: true
+      admin:
+        existingSecret: grafana-admin-credentials
+        userKey: admin-user
+        passwordKey: admin-password
+      ingress:
+        enabled: true
+        annotations:
+          traefik.ingress.kubernetes.io/ssl-redirect: "true"
+          cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        hosts:
+          - grafana.melekabderrahmane.com
+        tls:
+          - secretName: grafana-tls
+            hosts:
+              - grafana.melekabderrahmane.com
+      persistence:
+        enabled: true
+        size: 1Gi
+      resources:
+        requests:
+          cpu: 50m
+          memory: 100Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+      defaultDashboardsEnabled: true
+      defaultDashboardsTimezone: UTC
+      sidecar:
+        dashboards:
+          enabled: true
+          searchNamespace: ALL
+        datasources:
+          enabled: true
+
+    # --- PROMETHEUS ---
+    prometheus:
+      prometheusSpec:
+        retention: 7d
+        retentionSize: "4GB"
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 5Gi
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        # Discover all ServiceMonitors/PodMonitors across namespaces
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelectorNilUsesHelmValues: false
+        ruleSelectorNilUsesHelmValues: false
+
+    # --- ALERTMANAGER: DISABLED ---
+    alertmanager:
+      enabled: false
+
+    # --- NODE EXPORTER ---
+    nodeExporter:
+      enabled: true
+    prometheus-node-exporter:
+      resources:
+        requests:
+          cpu: 20m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
+
+    # --- KUBE-STATE-METRICS ---
+    kubeStateMetrics:
+      enabled: true
+    kube-state-metrics:
+      resources:
+        requests:
+          cpu: 20m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
+
+    # --- OPERATOR ---
+    prometheusOperator:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
+
+    # --- k3s: disable monitors for embedded components ---
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeProxy:
+      enabled: false
+    kubeEtcd:
+      enabled: false

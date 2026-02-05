@@ -6,7 +6,7 @@ GitOps repository for EasyTP Kubernetes infrastructure managed by Flux CD.
 
 ```
 ├── clusters/production/     # Cluster-level Kustomizations
-├── infrastructure/          # Namespaces, cert-manager config
+├── infrastructure/          # Namespaces, cert-manager, monitoring
 ├── apps/                    # Application deployments
 │   ├── django-app/          # Django backend + PostgreSQL + Redis + Nginx
 │   └── registry/            # Self-hosted Docker registry
@@ -43,6 +43,12 @@ kubectl create secret generic django-secrets \
   --from-literal=DB_PASSWORD=<password> \
   --from-literal=SECRET_KEY=<secret-key> \
   --from-literal=WEBHOOK_SECRET=<webhook-secret>
+
+# Grafana admin credentials (monitoring)
+kubectl create secret generic grafana-admin-credentials \
+  --namespace=monitoring \
+  --from-literal=admin-user=admin \
+  --from-literal=admin-password=<password>
 ```
 
 ## Bootstrap
