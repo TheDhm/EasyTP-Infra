@@ -29,6 +29,8 @@ spec:
     # --- GRAFANA ---
     grafana:
       enabled: true
+      initChownData:
+        enabled: false
       admin:
         existingSecret: grafana-admin-credentials
         userKey: admin-user
