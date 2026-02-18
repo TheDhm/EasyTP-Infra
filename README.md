@@ -37,12 +37,13 @@ kubectl create secret docker-registry registry-pull-secret \
   --docker-username=<username> \
   --docker-password=<password>
 
-# Django secrets (DB_PASSWORD, SECRET_KEY, WEBHOOK_SECRET)
+# Django secrets (DB_PASSWORD, SECRET_KEY, WEBHOOK_SECRET, TURNSTILE_SECRET_KEY)
 kubectl create secret generic django-secrets \
   --namespace=django-app \
   --from-literal=DB_PASSWORD=<password> \
   --from-literal=SECRET_KEY=<secret-key> \
-  --from-literal=WEBHOOK_SECRET=<webhook-secret>
+  --from-literal=WEBHOOK_SECRET=<webhook-secret> \
+  --from-literal=TURNSTILE_SECRET_KEY=<turnstile-secret-key>
 
 # Grafana admin credentials (monitoring)
 kubectl create secret generic grafana-admin-credentials \

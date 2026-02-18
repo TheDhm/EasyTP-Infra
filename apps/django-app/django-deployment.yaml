@@ -59,6 +59,11 @@ spec:
                 secretKeyRef:
                   name: django-secrets
                   key: WEBHOOK_SECRET
+            - name: TURNSTILE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: django-secrets
+                  key: TURNSTILE_SECRET_KEY
       containers:
         - name: django
           image: registry.melekabderrahmane.com/easytp-backend:20260218-120710-6a938cf # {"$imagepolicy": "flux-system:easytp-backend"}
@@ -101,6 +106,11 @@ spec:
                 secretKeyRef:
                   name: django-secrets
                   key: WEBHOOK_SECRET
+            - name: TURNSTILE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: django-secrets
+                  key: TURNSTILE_SECRET_KEY
             - name: REGISTRY_URL
               valueFrom:
                 configMapKeyRef:
