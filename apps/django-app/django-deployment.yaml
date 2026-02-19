@@ -20,7 +20,7 @@ spec:
         - name: registry-pull-secret
       initContainers:
         - name: migrate
-          image: registry.melekabderrahmane.com/easytp-backend:20260218-120710-6a938cf # {"$imagepolicy": "flux-system:easytp-backend"}
+          image: registry.melekabderrahmane.com/easytp-backend:20260219-100630-a0e93e5 # {"$imagepolicy": "flux-system:easytp-backend"}
           imagePullPolicy: Always
           command: ["python", "manage.py", "migrate", "--noinput"]
           env:
@@ -66,7 +66,7 @@ spec:
                   key: TURNSTILE_SECRET_KEY
       containers:
         - name: django
-          image: registry.melekabderrahmane.com/easytp-backend:20260218-120710-6a938cf # {"$imagepolicy": "flux-system:easytp-backend"}
+          image: registry.melekabderrahmane.com/easytp-backend:20260219-100630-a0e93e5 # {"$imagepolicy": "flux-system:easytp-backend"}
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
