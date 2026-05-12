@@ -11,6 +11,7 @@ resources:
   - django-deployment.yaml
   - nginx-deployment.yaml
   - ingress.yaml
+  - traefik-middlewares.yaml
 configMapGenerator:
   - name: nginx-config
     namespace: django-app
