@@ -6,10 +6,10 @@ metadata:
   namespace: monitoring
   annotations:
     # Duplicated in monitoring ns because Traefik's allowCrossNamespace is not
-    # enabled in this cluster — an Ingress in monitoring cannot reference a
-    # Middleware in django-app. Same CF list, same ownership pattern: Flux
-    # creates this once, S5c's CronJob owns sourceRange thereafter.
-    kustomize.toolkit.fluxcd.io/reconcile: disabled
+    # enabled — an Ingress in monitoring cannot reference a Middleware in
+    # django-app. Same CF list, same ownership pattern: Flux creates this once
+    # via `ssa: IfNotPresent`, S5c's CronJob owns sourceRange thereafter.
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
 spec:
   ipAllowList:
     sourceRange:
@@ -42,7 +42,7 @@ metadata:
   name: ratelimit-default
   namespace: monitoring
   annotations:
-    kustomize.toolkit.fluxcd.io/reconcile: disabled
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
 spec:
   rateLimit:
     average: 50

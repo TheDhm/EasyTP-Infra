@@ -6,9 +6,10 @@ metadata:
   namespace: django-app
   annotations:
     # Flux creates this once with the CF snapshot below; the S5c CronJob owns
-    # sourceRange thereafter. Without this annotation, Flux and the CronJob
-    # fight every reconcile.
-    kustomize.toolkit.fluxcd.io/reconcile: disabled
+    # sourceRange thereafter. `ssa: IfNotPresent` tells Flux to apply on first
+    # creation and then leave the resource alone — NOT `reconcile: disabled`,
+    # which makes Flux skip the resource entirely (including creation).
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
 spec:
   ipAllowList:
     # Match the TCP peer IP — after S5a (externalTrafficPolicy=Local +
@@ -46,9 +47,8 @@ metadata:
   namespace: django-app
   annotations:
     # excludedIPs holds the same CF list as cloudflare-only.sourceRange, so the
-    # S5c CronJob owns this field too. Disable Flux reconcile for the same
-    # reason.
-    kustomize.toolkit.fluxcd.io/reconcile: disabled
+    # S5c CronJob owns this field too. Same `ssa: IfNotPresent` pattern.
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
 spec:
   rateLimit:
     average: 50
