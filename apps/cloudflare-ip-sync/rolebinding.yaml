@@ -1,0 +1,30 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cf-ip-sync
+  namespace: django-app
+subjects:
+  - kind: ServiceAccount
+    name: cf-ip-sync
+    namespace: django-app
+roleRef:
+  kind: Role
+  name: cf-ip-sync
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cf-ip-sync
+  namespace: monitoring
+subjects:
+  # Cross-namespace subject — legal. Single SA lives in django-app; the
+  # monitoring-side Role binds back to it instead of needing a second SA.
+  - kind: ServiceAccount
+    name: cf-ip-sync
+    namespace: django-app
+roleRef:
+  kind: Role
+  name: cf-ip-sync
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,25 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cf-ip-sync
+  namespace: django-app
+rules:
+  - apiGroups: ["traefik.io"]
+    resources: ["middlewares"]
+    # resourceNames is non-negotiable: without it a compromised pod could
+    # mutate any Middleware in the namespace, including unrelated ones added
+    # later.
+    resourceNames: ["cloudflare-only", "ratelimit-default"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cf-ip-sync
+  namespace: monitoring
+rules:
+  - apiGroups: ["traefik.io"]
+    resources: ["middlewares"]
+    resourceNames: ["cloudflare-only", "ratelimit-default"]
+    verbs: ["get", "patch"]

@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - django-app
   - registry
+  - cloudflare-ip-sync

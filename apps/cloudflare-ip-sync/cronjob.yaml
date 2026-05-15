@@ -1,0 +1,111 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cf-ip-sync
+  namespace: django-app
+spec:
+  # Hourly at :17 (UTC — kube-controller-manager parses cron in host TZ).
+  # Off :00 to avoid the cron herd. Worst-case CF-list staleness ~1h instead
+  # of ~24h; new CF edges otherwise 403 every user behind them until next run.
+  schedule: "17 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 180
+      backoffLimit: 2
+      template:
+        spec:
+          serviceAccountName: cf-ip-sync
+          automountServiceAccountToken: true
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            seccompProfile:
+              type: RuntimeDefault
+          volumes:
+            - name: tmp
+              emptyDir: {}
+          containers:
+            - name: cf-ip-sync
+              image: alpine/k8s:1.32.2
+              imagePullPolicy: IfNotPresent
+              env:
+                # Without HOME, runAsUser=65532 (nobody) gets HOME=/nonexistent
+                # and kubectl can't write its discovery cache. Point it at the
+                # writable emptyDir.
+                - name: HOME
+                  value: /tmp
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  # 1. Confirm every target Middleware still has ssa:IfNotPresent.
+                  # If someone removed the annotation in git, Flux owns the field
+                  # again and our patch will be reverted within minutes — fail
+                  # loudly instead of silently churning.
+                  for NS in django-app monitoring; do
+                    for NAME in cloudflare-only ratelimit-default; do
+                      ANNOT=$(kubectl -n "$NS" get middleware "$NAME" \
+                        -o jsonpath='{.metadata.annotations.kustomize\.toolkit\.fluxcd\.io/ssa}')
+                      [ "$ANNOT" = "IfNotPresent" ] || { echo "$NS/$NAME ssa annotation is '$ANNOT', not 'IfNotPresent' — refusing to patch" >&2; exit 1; }
+                    done
+                  done
+
+                  # 2. Pull live CF lists; sort -u dedupes the rare migration-window dupes.
+                  V4=$(curl -sf --max-time 10 https://www.cloudflare.com/ips-v4)
+                  V6=$(curl -sf --max-time 10 https://www.cloudflare.com/ips-v6)
+                  ALL=$(printf '%s\n%s\n' "$V4" "$V6" | sed '/^$/d' | sort -u)
+
+                  # 3. Sanity floor — CF today publishes 22 ranges (15 v4 + 7 v6).
+                  # The >=15 floor is the only defense against a truncated/corrupt
+                  # response replacing a healthy list with one or two entries.
+                  # Do not lower without thinking.
+                  COUNT=$(printf '%s\n' "$ALL" | wc -l)
+                  [ "$COUNT" -ge 15 ] || { echo "CF list too small ($COUNT) — refusing to patch" >&2; exit 1; }
+
+                  # 4. Validate every entry as a real CIDR. Stronger than a regex:
+                  # rejects 192..168.1.0/24, 2001:::1/32, prefix > 32/128, stray HTML.
+                  printf '%s\n' "$ALL" | python3 -c '
+                  import ipaddress, sys
+                  for line in sys.stdin:
+                      ipaddress.ip_network(line.strip(), strict=False)
+                  ' || { echo "non-CIDR entry in CF response — refusing to patch" >&2; exit 1; }
+
+                  # 5. Build the two patch shapes — same list, two JSON paths.
+                  JSON_LIST=$(printf '%s\n' "$ALL" | jq -R . | jq -s .)
+                  SR_PATCH=$(jq -n --argjson l "$JSON_LIST" '{spec:{ipAllowList:{sourceRange:$l}}}')
+                  EX_PATCH=$(jq -n --argjson l "$JSON_LIST" '{spec:{rateLimit:{sourceCriterion:{ipStrategy:{excludedIPs:$l}}}}}')
+
+                  # 6. Dry-run preflight — server-side validate all four patches before
+                  # mutating any. Catches RBAC errors, throttling, and missing parent
+                  # fields up front, so we never end up two-of-four updated and two stale.
+                  for NS in django-app monitoring; do
+                    kubectl -n "$NS" patch middleware cloudflare-only   --type merge --dry-run=server -p "$SR_PATCH" >/dev/null
+                    kubectl -n "$NS" patch middleware ratelimit-default --type merge --dry-run=server -p "$EX_PATCH" >/dev/null
+                  done
+
+                  # 7. All four dry-runs passed — mutate for real.
+                  for NS in django-app monitoring; do
+                    kubectl -n "$NS" patch middleware cloudflare-only   --type merge -p "$SR_PATCH"
+                    kubectl -n "$NS" patch middleware ratelimit-default --type merge -p "$EX_PATCH"
+                  done
