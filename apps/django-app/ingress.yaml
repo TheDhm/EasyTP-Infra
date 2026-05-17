@@ -8,6 +8,11 @@ metadata:
     traefik.ingress.kubernetes.io/ssl-redirect: "true"
     traefik.ingress.kubernetes.io/backend-protocol: "HTTP"
     traefik.ingress.kubernetes.io/router.middlewares: django-app-cloudflare-only@kubernetescrd,django-app-ratelimit-default@kubernetescrd
+    # Cloudflare Authenticated Origin Pulls — Traefik refuses the TLS handshake
+    # unless CF presents a client cert chaining to the CA in cf-origin-ca.
+    # Removing this annotation reverts to default TLS without client-cert
+    # enforcement (kept as a fast rollback path).
+    traefik.ingress.kubernetes.io/router.tls.options: django-app-require-cf-client-cert@kubernetescrd
 spec:
   tls:
   - hosts:

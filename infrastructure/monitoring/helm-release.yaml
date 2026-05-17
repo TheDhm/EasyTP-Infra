@@ -41,6 +41,10 @@ spec:
           traefik.ingress.kubernetes.io/ssl-redirect: "true"
           cert-manager.io/cluster-issuer: "letsencrypt-prod"
           traefik.ingress.kubernetes.io/router.middlewares: monitoring-cloudflare-only@kubernetescrd,monitoring-ratelimit-default@kubernetescrd
+          # Cloudflare Authenticated Origin Pulls — require CF's client cert at
+          # the TLS handshake (verified against the cf-origin-ca Secret in this
+          # namespace). Removing this annotation reverts to default TLS.
+          traefik.ingress.kubernetes.io/router.tls.options: monitoring-require-cf-client-cert@kubernetescrd
         hosts:
           - grafana.melekabderrahmane.com
         tls:
