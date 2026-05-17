@@ -1,0 +1,15 @@
+apiVersion: traefik.io/v1alpha1
+kind: TLSOption
+metadata:
+  name: require-cf-client-cert
+  namespace: monitoring
+spec:
+  clientAuth:
+    # Trust anchor: AOP root CA (cf-origin-ca-secret.yaml, same namespace).
+    # Provider reads key `tls.ca`.
+    secretNames:
+      - cf-origin-ca
+    # With zone-wide AOP enabled on Cloudflare, CF presents its shared client
+    # cert on every handshake to a proxied (orange-cloud) host in the zone.
+    # Reject the handshake if that cert is missing or doesn't chain to the CA.
+    clientAuthType: RequireAndVerifyClientCert

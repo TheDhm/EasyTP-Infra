@@ -4,3 +4,5 @@ resources:
   - helm-repository.yaml
   - helm-release.yaml
   - traefik-middlewares.yaml
+  - traefik-tlsoption.yaml
+  - cf-origin-ca-secret.yaml
