@@ -120,6 +120,19 @@ spec:
               value: "nfs-service.django-app.svc.cluster.local"
             - name: NFS_PATH
               value: "/opt/django-shared"
+            # Cloudflare Realtime TURN key. deploy_app mints short-lived TURN
+            # credentials per WebRTC (Selkies) app deploy so their media relays
+            # through Cloudflare (origin IP stays hidden; no self-hosted relay).
+            - name: CLOUDFLARE_TURN_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: django-secrets
+                  key: CLOUDFLARE_TURN_KEY_ID
+            - name: CLOUDFLARE_TURN_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: django-secrets
+                  key: CLOUDFLARE_TURN_API_TOKEN
           volumeMounts:
             - name: shared-data
               mountPath: /app/staticfiles
