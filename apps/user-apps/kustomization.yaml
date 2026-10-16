@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - traefik-tlsoption.yaml
   - cf-origin-ca-secret.yaml
+  - traefik-middlewares.yaml
