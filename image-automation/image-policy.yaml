@@ -1,5 +1,5 @@
 ---
-apiVersion: image.toolkit.fluxcd.io/v1beta2
+apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImagePolicy
 metadata:
   name: easytp-backend
@@ -13,7 +13,7 @@ spec:
     alphabetical:
       order: asc
 # ---
-# apiVersion: image.toolkit.fluxcd.io/v1beta2
+# apiVersion: image.toolkit.fluxcd.io/v1
 # kind: ImagePolicy
 # metadata:
 #   name: logisim
