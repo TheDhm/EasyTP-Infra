@@ -30,7 +30,7 @@ spec:
               type: RuntimeDefault
           containers:
             - name: purge-guests
-              image: registry.melekabderrahmane.com/easytp-backend:20261016-175047-2a5e3c5 # {"$imagepolicy": "flux-system:easytp-backend"}
+              image: registry.melekabderrahmane.com/easytp-backend:20261123-113025-808b58c # {"$imagepolicy": "flux-system:easytp-backend"}
               command: ["python", "manage.py", "purge_guests", "--hours", "24"]
               envFrom:
                 - configMapRef:
