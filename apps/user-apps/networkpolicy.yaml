@@ -4,9 +4,7 @@
 # off limits: Redis, PostgreSQL, the backend's port 8000, Prometheus, the API server,
 # the kubelet, the cloud metadata service.
 #
-# NOT YET LISTED in kustomization.yaml: enable it only after the backend image that
-# labels cleanup Jobs `app: cleanup-job` is live (older Jobs would lose API access and
-# stop cleaning up), then verify a noVNC lab, a WebRTC lab and one cleanup end to end.
+# To roll back: remove this file from kustomization.yaml (Flux prunes the policies).
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

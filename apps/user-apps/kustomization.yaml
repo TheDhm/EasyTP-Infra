@@ -6,5 +6,4 @@ resources:
   - traefik-middlewares.yaml
   - quota.yaml
   - storage.yaml
-  # Staged, see the header of the file before enabling:
-  # - networkpolicy.yaml
+  - networkpolicy.yaml
