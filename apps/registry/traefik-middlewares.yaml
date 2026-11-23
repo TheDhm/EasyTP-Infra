@@ -1,0 +1,13 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ratelimit
+  namespace: registry
+spec:
+  # Per source IP. This host is DNS-only (not proxied by Cloudflare), and the Traefik
+  # Service uses externalTrafficPolicy: Local, so the TCP peer is the real client and
+  # no ipStrategy is needed. A push is a few dozen requests; burst covers it.
+  rateLimit:
+    average: 10
+    burst: 100
+    period: 1s

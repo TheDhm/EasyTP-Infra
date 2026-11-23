@@ -14,6 +14,8 @@ resources:
   - traefik-middlewares.yaml
   - traefik-tlsoption.yaml
   - cf-origin-ca-secret.yaml
+  - networkpolicy.yaml
+  - purge-guests-cronjob.yaml
 configMapGenerator:
   - name: nginx-config
     namespace: django-app

@@ -1,0 +1,62 @@
+# Guest accounts are only deleted on logout; a guest who just closes the tab leaves an
+# account and a /USERDATA folder behind forever. Sweep them daily.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: purge-guests
+  namespace: django-app
+spec:
+  schedule: "43 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 600
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app: purge-guests
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          imagePullSecrets:
+            - name: registry-pull-secret
+          securityContext:
+            runAsUser: 1000
+            fsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: purge-guests
+              image: registry.melekabderrahmane.com/easytp-backend:20261016-175047-2a5e3c5 # {"$imagepolicy": "flux-system:easytp-backend"}
+              command: ["python", "manage.py", "purge_guests", "--hours", "24"]
+              envFrom:
+                - configMapRef:
+                    name: django-config
+                - secretRef:
+                    name: django-secrets
+              securityContext:
+                runAsNonRoot: true
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  cpu: 300m
+                  memory: 256Mi
+              volumeMounts:
+                # The backend's post_delete signal removes each guest's folder.
+                - name: shared-data
+                  mountPath: /USERDATA
+                  subPath: USERDATA
+          volumes:
+            - name: shared-data
+              hostPath:
+                path: /opt/django-shared
+                type: DirectoryOrCreate

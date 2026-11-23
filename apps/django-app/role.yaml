@@ -3,22 +3,24 @@ kind: Role
 metadata:
   namespace: apps
   name: django-role-in-apps
+# Exactly the calls the backend makes (shared/kubernetes/*.py): list for status,
+# create/delete for start/stop. No update/patch/watch, and no pod writes.
 rules:
 - apiGroups: [""]
   resources: ["pods"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  verbs: ["get", "list"]
 - apiGroups: [""]
   resources: ["services"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  verbs: ["get", "list", "create", "delete"]
 - apiGroups: ["discovery.k8s.io"]
   resources: ["endpointslices"]
-  verbs: ["get", "list", "watch"]
+  verbs: ["get", "list"]
 - apiGroups: ["apps"]
   resources: ["deployments"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  verbs: ["get", "list", "create", "delete"]
 - apiGroups: ["networking.k8s.io"]
   resources: ["ingresses"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  verbs: ["get", "list", "create", "delete"]
 - apiGroups: ["batch"]
   resources: ["jobs"]
-  verbs: ["get", "list", "watch", "create", "delete"]
+  verbs: ["get", "list", "create", "delete"]

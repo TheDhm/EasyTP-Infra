@@ -4,3 +4,7 @@ resources:
   - traefik-tlsoption.yaml
   - cf-origin-ca-secret.yaml
   - traefik-middlewares.yaml
+  - quota.yaml
+  - storage.yaml
+  # Staged, see the header of the file before enabling:
+  # - networkpolicy.yaml

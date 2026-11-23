@@ -1,0 +1,44 @@
+# Redis and PostgreSQL are only for the backend. Without these, every pod in the
+# cluster -- including the lab pods users control in `apps` -- can open a connection
+# to them. (k3s enforces NetworkPolicy with its embedded kube-router controller.)
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-from-backend-only
+  namespace: django-app
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: django-app
+      ports:
+        - protocol: TCP
+          port: 6379
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgresql-from-backend-only
+  namespace: django-app
+spec:
+  podSelector:
+    matchLabels:
+      app: postgresql
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: django-app
+        - podSelector:
+            matchLabels:
+              app: purge-guests
+      ports:
+        - protocol: TCP
+          port: 5432

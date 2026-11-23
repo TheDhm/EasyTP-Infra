@@ -13,10 +13,16 @@ spec:
       labels:
         app: postgresql
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: postgresql
         image: postgres:15.17
         imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
         ports:
         - containerPort: 5432
         env:

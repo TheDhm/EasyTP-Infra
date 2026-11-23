@@ -31,7 +31,7 @@ spec:
               emptyDir: {}
           containers:
             - name: cf-ip-sync
-              image: alpine/k8s:1.32.2
+              image: alpine/k8s:1.32.2@sha256:15cfdf84d6de3559bc54d7479eb4e8aadbf71f6d7f08782cb1e91f3446f4b2d8
               imagePullPolicy: IfNotPresent
               env:
                 # Without HOME, runAsUser=65532 (nobody) gets HOME=/nonexistent

@@ -20,8 +20,8 @@ data:
     maxmemory 256mb
     maxmemory-policy allkeys-lru
 
-    # Security - DISABLE protected mode for internal cluster use
-    protected-mode no
+    # Auth: the password is passed on the command line from the django-secrets
+    # Secret (--requirepass, see the Deployment), never stored in this ConfigMap.
 
     # Logging
     loglevel notice
@@ -81,6 +81,10 @@ spec:
       labels:
         app: redis
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: redis
         image: redis:7.4.9-alpine
@@ -91,6 +95,16 @@ spec:
         command:
         - redis-server
         - /etc/redis/redis.conf
+        - --requirepass
+        - $(REDIS_PASSWORD)
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: django-secrets
+              key: REDIS_PASSWORD
+        securityContext:
+          allowPrivilegeEscalation: false
         volumeMounts:
         - name: redis-config
           mountPath: /etc/redis
