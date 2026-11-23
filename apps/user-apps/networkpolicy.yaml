@@ -1,0 +1,100 @@
+# Lab pods run sessions for untrusted users (guests included). They need exactly two
+# things from the network: to be reached by Traefik, and to reach the public internet
+# (Cloudflare TURN for WebRTC labs). Everything else in the cluster and on the node is
+# off limits: Redis, PostgreSQL, the backend's port 8000, Prometheus, the API server,
+# the kubelet, the cloud metadata service.
+#
+# NOT YET LISTED in kustomization.yaml: enable it only after the backend image that
+# labels cleanup Jobs `app: cleanup-job` is live (older Jobs would lose API access and
+# stop cleaning up), then verify a noVNC lab, a WebRTC lab and one cleanup end to end.
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: apps
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: labs-ingress-from-traefik
+  namespace: apps
+spec:
+  podSelector:
+    matchExpressions:
+      - {key: appDep, operator: Exists}  # set on every lab pod by deploy_app()
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: labs-egress-internet-only
+  namespace: apps
+spec:
+  podSelector:
+    matchExpressions:
+      - {key: appDep, operator: Exists}
+  policyTypes: ["Egress"]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - {protocol: UDP, port: 53}
+        - {protocol: TCP, port: 53}
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8        # pod (10.42/16) and service (10.43/16) networks
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 100.64.0.0/10
+              - 169.254.0.0/16    # link-local, incl. the cloud metadata service
+              - 91.99.117.103/32  # this node: API server 6443, kubelet 10250, node ports
+        - ipBlock:
+            cidr: ::/0
+            except:
+              - fc00::/7
+              - fe80::/10
+              - 2a01:4f8:c013:652b::/64  # this node
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cleanup-jobs-egress-apiserver
+  namespace: apps
+spec:
+  podSelector:
+    matchLabels:
+      app: cleanup-job
+  policyTypes: ["Egress"]
+  egress:
+    # kubectl -> kubernetes.default (10.43.0.1:443), which is DNAT'ed to the API server
+    # on the node. Both forms are listed because the policy may see either address.
+    - to:
+        - ipBlock: {cidr: 10.43.0.1/32}
+      ports:
+        - {protocol: TCP, port: 443}
+    - to:
+        - ipBlock: {cidr: 91.99.117.103/32}
+      ports:
+        - {protocol: TCP, port: 6443}
