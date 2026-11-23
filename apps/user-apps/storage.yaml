@@ -1,0 +1,65 @@
+# The two shared directories lab pods mount, as PersistentVolumes instead of raw
+# hostPath volumes in the pod spec. Same data, same node paths. Once the backend's
+# deploy_app() mounts these claims, the `apps` namespace can enforce the Pod Security
+# "baseline" level (which forbids hostPath), so that a compromised backend can no
+# longer create a pod that mounts the node's filesystem.
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: labs-userdata
+spec:
+  capacity:
+    storage: 10Gi  # informational for hostPath; not enforced
+  accessModes: ["ReadWriteMany"]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  claimRef:
+    namespace: apps
+    name: userdata
+  hostPath:
+    path: /opt/django-shared/USERDATA
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: userdata
+  namespace: apps
+spec:
+  accessModes: ["ReadWriteMany"]
+  storageClassName: manual
+  volumeName: labs-userdata
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: labs-readonly
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes: ["ReadWriteMany"]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  claimRef:
+    namespace: apps
+    name: readonly
+  hostPath:
+    path: /opt/django-shared/READONLY
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: readonly
+  namespace: apps
+spec:
+  accessModes: ["ReadWriteMany"]
+  storageClassName: manual
+  volumeName: labs-readonly
+  resources:
+    requests:
+      storage: 10Gi

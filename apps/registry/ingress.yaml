@@ -7,6 +7,9 @@ metadata:
     traefik.ingress.kubernetes.io/proxy-body-size: "0"
     traefik.ingress.kubernetes.io/ssl-redirect: "true"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # The registry is reachable from the whole internet (GitHub runners push to it)
+    # and guarded only by htpasswd: slow down credential guessing.
+    traefik.ingress.kubernetes.io/router.middlewares: registry-ratelimit@kubernetescrd
 spec:
   tls:
     - hosts:

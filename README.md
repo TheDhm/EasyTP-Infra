@@ -38,7 +38,10 @@ kubectl create secret docker-registry registry-pull-secret \
   --docker-password=<password>
 
 # Django secrets (DB_PASSWORD, SECRET_KEY, WEBHOOK_SECRET, TURNSTILE_SECRET_KEY,
-# CLOUDFLARE_TURN_KEY_ID, CLOUDFLARE_TURN_API_TOKEN). The two CLOUDFLARE_TURN_*
+# REDIS_PASSWORD, CLOUDFLARE_TURN_KEY_ID, CLOUDFLARE_TURN_API_TOKEN).
+# SECRET_KEY signs every login token: use at least 50 random characters.
+# REDIS_PASSWORD is shared by the redis and django Deployments; generate it with
+# `openssl rand -hex 32`. The two CLOUDFLARE_TURN_*
 # values come from a TURN key created in the Cloudflare Realtime dashboard.
 kubectl create secret generic django-secrets \
   --namespace=django-app \
@@ -46,6 +49,7 @@ kubectl create secret generic django-secrets \
   --from-literal=SECRET_KEY=<secret-key> \
   --from-literal=WEBHOOK_SECRET=<webhook-secret> \
   --from-literal=TURNSTILE_SECRET_KEY=<turnstile-secret-key> \
+  --from-literal=REDIS_PASSWORD=<redis-password> \
   --from-literal=CLOUDFLARE_TURN_KEY_ID=<cf-turn-key-id> \
   --from-literal=CLOUDFLARE_TURN_API_TOKEN=<cf-turn-api-token>
 

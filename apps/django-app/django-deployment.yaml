@@ -16,13 +16,25 @@ spec:
       securityContext:
         runAsUser: 1000
         fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       imagePullSecrets:
         - name: registry-pull-secret
       initContainers:
         - name: migrate
           image: registry.melekabderrahmane.com/easytp-backend:20261123-113025-808b58c # {"$imagepolicy": "flux-system:easytp-backend"}
           imagePullPolicy: Always
-          command: ["python", "manage.py", "migrate", "--noinput"]
+          # flushexpiredtokens keeps the JWT blacklist tables from growing forever.
+          command:
+            - sh
+            - -c
+            - python manage.py migrate --noinput && (python manage.py flushexpiredtokens || true)
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
           env:
             - name: DJANGO_SETTINGS_MODULE
               valueFrom:
@@ -70,7 +82,18 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
           env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: django-secrets
+                  key: REDIS_PASSWORD
             - name: DJANGO_SETTINGS_MODULE
               valueFrom:
                 configMapKeyRef:
@@ -134,6 +157,9 @@ spec:
                   name: django-secrets
                   key: CLOUDFLARE_TURN_API_TOKEN
           volumeMounts:
+            # Root filesystem is read-only; uploads spool here before being saved.
+            - name: tmp
+              mountPath: /tmp
             - name: shared-data
               mountPath: /app/staticfiles
               subPath: staticfiles
@@ -176,6 +202,9 @@ spec:
               memory: "800Mi"
               cpu: "800m"
       volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 256Mi
         - name: shared-data
           hostPath:
             path: /opt/django-shared

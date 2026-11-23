@@ -1,0 +1,14 @@
+# Cap what lab sessions can claim, so a burst of guests gets a clean "quota exceeded"
+# instead of starving the backend, database and ingress on this single 4-CPU node.
+# A noVNC lab requests 600m / 400Mi, a WebRTC lab 1500m / 1Gi, a cleanup Job 10m / 32Mi.
+# Tune when the node changes size.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: labs
+  namespace: apps
+spec:
+  hard:
+    requests.cpu: "2500m"
+    requests.memory: 4Gi
+    pods: "20"
