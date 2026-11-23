@@ -5,6 +5,12 @@ metadata:
   namespace: django-app
 spec:
   replicas: 1
+  # Recreate, not the default RollingUpdate: a rolling update starts the new pod while
+  # the old one still has the data directory open. Two PostgreSQL instances on one
+  # volume fight over postmaster.pid (seen on 2026-11-23: the new pod shut itself down
+  # and had to run crash recovery) and can corrupt data.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: postgresql

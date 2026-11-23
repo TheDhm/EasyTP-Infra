@@ -89,6 +89,10 @@ spec:
             capabilities:
               drop: ["ALL"]
           env:
+            # gunicorn keeps its control socket under $HOME; the image's home directory
+            # is on the read-only root filesystem, so point it at the writable /tmp.
+            - name: HOME
+              value: /tmp
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
