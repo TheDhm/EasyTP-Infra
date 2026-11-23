@@ -22,7 +22,7 @@ spec:
         - name: registry-pull-secret
       initContainers:
         - name: migrate
-          image: registry.melekabderrahmane.com/easytp-backend:20261123-113025-808b58c # {"$imagepolicy": "flux-system:easytp-backend"}
+          image: registry.melekabderrahmane.com/easytp-backend:20261123-132227-e6eb74f # {"$imagepolicy": "flux-system:easytp-backend"}
           imagePullPolicy: Always
           # flushexpiredtokens keeps the JWT blacklist tables from growing forever.
           command:
@@ -78,7 +78,7 @@ spec:
                   key: TURNSTILE_SECRET_KEY
       containers:
         - name: django
-          image: registry.melekabderrahmane.com/easytp-backend:20261123-113025-808b58c # {"$imagepolicy": "flux-system:easytp-backend"}
+          image: registry.melekabderrahmane.com/easytp-backend:20261123-132227-e6eb74f # {"$imagepolicy": "flux-system:easytp-backend"}
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
